@@ -1,0 +1,52 @@
+{
+    "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.14/MicrosoftTeams.schema.json",
+    "manifestVersion": "1.14",
+    "version": "1.0.0",
+    "id": "84b106c5-5a60-49d1-aba9-a2402acde624",
+    "packageName": "com.microsoft.teams.hourlybot",
+    "developer": {
+      "name": "Your Name",
+      "websiteUrl": "https://12073618cab7.ngrok-free.app",
+      "privacyUrl": "https://12073618cab7.ngrok-free.app/privacy",
+      "termsOfUseUrl": "https://12073618cab7.ngrok-free.app/terms"
+    },
+    "name": {
+      "short": "Hourly Bot",
+      "full": "Hourly Check Bot for Teams"
+    },
+    "description": {
+      "short": "A bot that sends hourly notifications and reminders",
+      "full": "This bot provides hourly notifications and productivity tracking by asking users what they're working on at scheduled times."
+    },
+    "icons": {
+      "outline": "outline.png",
+      "color": "color.png"
+    },
+    "accentColor": "#FFFFFF",
+    "bots": [
+      {
+        "botId": "84b106c5-5a60-49d1-aba9-a2402acde624",
+        "scopes": [
+          "personal",
+          "team",
+          "groupchat"
+        ],
+        "supportsFiles": false,
+        "isNotificationOnly": false
+      }
+    ],
+    "composeExtensions": [],
+    "configurableTabs": [],
+    "staticTabs": [],
+    "permissions": [
+      "identity",
+      "messageTeamMembers"
+    ],
+    "validDomains": [
+      "12073618cab7.ngrok-free.app"
+    ],
+    "webApplicationInfo": {
+      "id": "84b106c5-5a60-49d1-aba9-a2402acde624",
+      "resource": "https://12073618cab7.ngrok-free.app"
+    }
+} 

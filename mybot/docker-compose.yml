@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: hourlybot_db
+      POSTGRES_USER: hourlybot_user
+      POSTGRES_PASSWORD: hourlybot_password
+      TZ: Asia/Almaty
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hourlybot_user -d hourlybot_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    environment:
+      TZ: Asia/Almaty
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django Bot Application
+  bot:
+    build: .
+    environment:
+      - POSTGRES_DB=hourlybot_db
+      - POSTGRES_USER=hourlybot_user
+      - POSTGRES_PASSWORD=hourlybot_password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - DEBUG=True
+      - TZ=Asia/Almaty
+    volumes:
+      - ./logs:/app/logs
+      - ./media:/app/media
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py setup_schedules &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  # Celery Worker
+  celery-worker:
+    build: .
+    environment:
+      - POSTGRES_DB=hourlybot_db
+      - POSTGRES_USER=hourlybot_user
+      - POSTGRES_PASSWORD=hourlybot_password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - TZ=Asia/Almaty
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A bot1 worker --loglevel=info --concurrency=1
+
+  # Celery Beat Scheduler
+  celery-beat:
+    build: .
+    environment:
+      - POSTGRES_DB=hourlybot_db
+      - POSTGRES_USER=hourlybot_user
+      - POSTGRES_PASSWORD=hourlybot_password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - TZ=Asia/Almaty
+    volumes:
+      - ./logs:/app/logs
+      - celery_beat_data:/app/celerybeat-schedule
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A bot1 beat --loglevel=info --scheduler=django_celery_beat.schedulers:DatabaseScheduler
+
+volumes:
+  postgres_data:
+  celery_beat_data:

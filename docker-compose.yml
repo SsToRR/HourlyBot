@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: hourlybot_postgres
+    environment:
+      POSTGRES_DB: hourlybot_db
+      POSTGRES_USER: hourlybot_user
+      POSTGRES_PASSWORD: hourlybot_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: hourlybot_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Django Web Application
+  web:
+    build: ./mybot
+    container_name: hourlybot_web
+    environment:
+      - POSTGRES_DB=hourlybot_db
+      - POSTGRES_USER=hourlybot_user
+      - POSTGRES_PASSWORD=hourlybot_password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./mybot:/app
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+
+  # Celery Worker
+  celery_worker:
+    build: ./mybot
+    container_name: hourlybot_celery_worker
+    environment:
+      - POSTGRES_DB=hourlybot_db
+      - POSTGRES_USER=hourlybot_user
+      - POSTGRES_PASSWORD=hourlybot_password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./mybot:/app
+    restart: unless-stopped
+    command: celery -A bot1 worker --loglevel=info
+
+  # Celery Beat Scheduler
+  celery_beat:
+    build: ./mybot
+    container_name: hourlybot_celery_beat
+    environment:
+      - POSTGRES_DB=hourlybot_db
+      - POSTGRES_USER=hourlybot_user
+      - POSTGRES_PASSWORD=hourlybot_password
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./mybot:/app
+    restart: unless-stopped
+    command: celery -A bot1 beat --loglevel=info --scheduler=django_celery_beat.schedulers:DatabaseScheduler
+
+volumes:
+  postgres_data: 
