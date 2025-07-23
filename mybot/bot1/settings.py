@@ -21,8 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xo@9&t24()3fv&()l2i10lfp@*2mb)fk=7#v3lyek$*^0=*@gb'
-OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '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')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-this-in-production')
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -144,8 +144,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Bot Framework Configuration
-BOT_FRAMEWORK_APP_ID = '84b106c5-5a60-49d1-aba9-a2402acde624'
-BOT_FRAMEWORK_APP_PASSWORD = 'FOa8Q~i4CnV4S3pQCTEvglmFv6fgRuyrySy-1dyA'
+BOT_FRAMEWORK_APP_ID = os.environ.get('BOT_FRAMEWORK_APP_ID', '')
+BOT_FRAMEWORK_APP_PASSWORD = os.environ.get('BOT_FRAMEWORK_APP_PASSWORD', '')
 
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

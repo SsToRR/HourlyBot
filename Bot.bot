@@ -6,8 +6,8 @@
             "type": "endpoint",
             "name": "Bot",
             "id": "46611520-623d-11f0-8848-b7224d0eb4d5",
-            "appId": "84b106c5-5a60-49d1-aba9-a2402acde624",
-            "appPassword": "FOa8Q~i4CnV4S3pQCTEvglmFv6fgRuyrySy-1dyA",
+            "appId": "YOUR_BOT_FRAMEWORK_APP_ID",
+            "appPassword": "YOUR_BOT_FRAMEWORK_APP_PASSWORD",
             "tenantId": "",
             "endpoint": "https://12073618cab7.ngrok-free.app/bot/api/messages/"
         }
